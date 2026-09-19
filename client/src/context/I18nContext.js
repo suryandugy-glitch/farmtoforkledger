@@ -1,0 +1,197 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+const I18nContext = createContext();
+
+// Default translations
+const translations = {
+  en: {
+    appTitle: 'FarmToFork Ledger',
+    appDescription: 'Supply Chain Transparency for Local Produce',
+    scanToTrace: 'Scan to Trace Your Food',
+    orUploadImage: 'Or upload an image containing a QR code',
+    scanning: 'Scanning...',
+    uploadImage: 'Upload Image',
+    demoQRCodes: 'Demo QR codes to try:',
+    howItWorks: 'How It Works',
+    step1Scan: '1. Scan QR Code',
+    step1Description: 'Use your phone camera to scan the QR code on any product',
+    step2SeeJourney: '2. See Journey',
+    step2Description: 'View the complete journey from farm to your table',
+    step3KnowImpact: '3. Know Impact',
+    step3Description: 'See exactly how much the farmer earned and their practices',
+    productDetails: 'Product Details',
+    farmerPrice: 'Farmer Price:',
+    retailPrice: 'Retail Price:',
+    farmersShare: "Farmer's Share:",
+    organic: 'Organic:',
+    pesticideUse: 'Pesticide Use:',
+    waterSource: 'Water Source:',
+    certifications: "Certifications:",
+    productJourney: 'Product Journey',
+    noJourneyData: 'No journey data available for this product.',
+    impactMetrics: 'Impact Metrics',
+    globalFoodFraudRate: 'Global Food Fraud Rate',
+    globalFoodFraudDescription: 'We help combat this through transparency',
+    farmerEarningsPerUnit: 'Farmer Earnings per Unit',
+    vsTypical: 'vs typical',
+    farmersShareOfRetailPrice: "Farmer's Share of Retail Price",
+    vsIndustryAvg: 'vs industry avg',
+    paperRecordsUsed: 'Paper Records Used',
+    paperRecordsDescription: 'Fully digital, immutable ledger',
+    blockchainSecurity: 'Blockchain Security:',
+    blockchainSecurityDescription: 'Each journey step is cryptographically secured',
+    simulatedHash: 'Simulated hash:',
+    errorTitle: 'Product not found',
+    errorDescription: 'Try scanning one of our demo QR codes:',
+    footerText: 'FarmToFork Ledger - Built for Hackathon - Transparency from Seed to Shelf',
+    language: 'Language',
+    english: 'English',
+    spanish: 'Spanish',
+    darkMode: 'Dark Mode',
+    lightMode: 'Light Mode',
+    contactFarmer: 'Contact Farmer',
+    sendMessage: 'Send Message',
+    yourName: 'Your Name',
+    yourEmail: 'Your Email',
+    message: 'Message',
+    sending: 'Sending...',
+    sent: 'Message sent successfully!',
+    failed: 'Failed to send message. Please try again.',
+    // New translation keys for QRScanner
+    pointCameraAtQRCode: 'Point camera at QR code',
+    orUploadImageContainingQRCode: 'Or upload an image containing a QR code',
+    noQRFound: 'No QR code found in the image',
+    failedToProcessImage: 'Failed to process image',
+    scanned: 'Scanned',
+    // New translation keys for ProductDisplay and ImpactStats (if any)
+    unknownProduct: 'Unknown Product',
+    unknownFarm: 'Unknown Farm',
+    unknownLocation: 'Unknown Location',
+    unknownDate: 'Unknown Date',
+    yes: 'Yes',
+    no: 'No',
+    unknown: 'Unknown',
+    none: 'None',
+    loadingImpactData: 'Loading impact data...',
+    noDetailsAvailable: 'No details available',
+    unknownStage: 'Unknown Stage',
+    unknownTime: 'Unknown Time'
+  },
+  es: {
+    appTitle: 'FarmToFork Ledger',
+    appDescription: 'Transparencia en la Cadena de Suministro para Productos Locales',
+    scanToTrace: 'Escanea para Rastrear Tu Alimento',
+    orUploadImage: 'O sube una imagen que contenga un código QR',
+    scanning: 'Escaneando...',
+    uploadImage: 'Subir Imagen',
+    demoQRCodes: 'Códigos QR de demostración para probar:',
+    howItWorks: 'Cómo Funciona',
+    step1Scan: '1. Escanea el Código QR',
+    step1Description: 'Usa la cámara de tu teléfono para escanear el código QR en cualquier producto',
+    step2SeeJourney: '2. Ve el Recorrido',
+    step2Description: 'Ver el recorrido completo desde la granja hasta tu mesa',
+    step3KnowImpact: '3. Conoce el Impacto',
+    step3Description: 'Ve exactamente cuánto ganó el agricultor y sus prácticas',
+    productDetails: 'Detalles del Producto',
+    farmerPrice: 'Precio del Agricultor:',
+    retailPrice: 'Precio Minorista:',
+    farmersShare: "Parte del Agricultor:",
+    organic: 'Orgánico:',
+    pesticideUse: 'Uso de Pesticidas:',
+    waterSource: 'Fuente de Agua:',
+    certifications: "Certificaciones:",
+    productJourney: 'Recorrido del Producto',
+    noJourneyData: 'No hay datos de recorrido disponibles para este producto.',
+    impactMetrics: 'Métricas de Impacto',
+    globalFoodFraudRate: 'Tasa Global de Fraude Alimentario',
+    globalFoodFraudDescription: 'Ayudamos a combatir esto mediante la transparencia',
+    farmerEarningsPerUnit: 'Ingresos del Agricultor por Unidad',
+    vsTypical: 'vs típico',
+    farmersShareOfRetailPrice: "Parte del Agricultor del Precio Minorista",
+    vsIndustryAvg: 'vs promedio de la industria',
+    paperRecordsUsed: 'Registros de Papel Utilizados',
+    paperRecordsDescription: 'Totalmente digital, libro mayor inmutable',
+    blockchainSecurity: 'Seguridad de Blockchain:',
+    blockchainSecurityDescription: 'Cada paso del recorrido está criptográficamente asegurado',
+    simulatedHash: 'Hash simulado:',
+    errorTitle: 'Producto no encontrado',
+    errorDescription: 'Intenta escanear uno de nuestros códigos QR de demostración:',
+    footerText: 'FarmToFork Ledger - Construido para Hackathon - Transparencia desde la Semilla hasta el Estante',
+    language: 'Idioma',
+    english: 'Inglés',
+    spanish: 'Español',
+    darkMode: 'Modo Oscuro',
+    lightMode: 'Modo Claro',
+    contactFarmer: 'Contactar al Agricultor',
+    sendMessage: 'Enviar Mensaje',
+    yourName: 'Tu Nombre',
+    yourEmail: 'Tu Correo Electrónico',
+    message: 'Mensaje',
+    sending: 'Enviando...',
+    sent: 'Mensaje enviado exitosamente!',
+    failed: 'Falló al enviar el mensaje. Por favor, intenta de nuevo.',
+    // New translation keys for QRScanner
+    pointCameraAtQRCode: 'Apunta la cámara al código QR',
+    orUploadImageContainingQRCode: 'O sube una imagen que contenga un código QR',
+    noQRFound: 'No se encontró un código QR en la imagen',
+    failedToProcessImage: 'Falló al procesar la imagen',
+    scanned: 'Escaneado',
+    // New translation keys for ProductDisplay and ImpactStats (if any)
+    unknownProduct: 'Producto desconocido',
+    unknownFarm: 'Granja desconocida',
+    unknownLocation: 'Ubicación desconocida',
+    unknownDate: 'Fecha desconocida',
+    yes: 'Sí',
+    no: 'No',
+    unknown: 'Desconocido',
+    none: 'Ninguno',
+    loadingImpactData: 'Cargando datos de impacto...',
+    noDetailsAvailable: 'No hay detalles disponibles',
+    unknownStage: 'Etapa desconocida',
+    unknownTime: 'Hora desconocida'
+  }
+};
+
+export const useI18n = () => {
+  const context = useContext(I18nContext);
+  if (!context) {
+    throw new Error('useI18n must be used within an I18nProvider');
+  }
+  return context;
+};
+
+export const I18nProvider = ({ children }) => {
+  const [language, setLanguage] = useState(() => {
+    // Check localStorage for language preference, otherwise default to English
+    const savedLanguage = localStorage.getItem('language');
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'es')) {
+      return savedLanguage;
+    }
+    // Check navigator language
+    const navLang = navigator.language.slice(0, 2);
+    if (navLang === 'en' || navLang === 'es') {
+      return navLang;
+    }
+    return 'en';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('language', language);
+  }, [language]);
+
+  const t = (key) => {
+    return translations[language][key] || translations.en[key] || key;
+  };
+
+  const changeLanguage = (newLanguage) => {
+    if (newLanguage === 'en' || newLanguage === 'es') {
+      setLanguage(newLanguage);
+    }
+  };
+
+  return (
+    <I18nContext.Provider value={{ language, t, changeLanguage }}>
+      {children}
+    </I18nContext.Provider>
+  );
+};

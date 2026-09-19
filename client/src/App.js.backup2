@@ -1,0 +1,206 @@
+import React, { useState } from 'react';
+import './App.css';
+import QRScanner from './components/QRScanner';
+import ProductDisplay from './components/ProductDisplay';
+import ImpactStats from './components/ImpactStats';
+import { useTheme } from './context/ThemeContext';
+import { useI18n } from './context/I18nContext';
+
+function App() {
+  const [scannedProduct, setScannedProduct] = useState(null);
+  const [scanning, setScanning] = useState(false);
+  const [contactFormVisible, setContactFormVisible] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [contactStatus, setContactStatus] = useState(null); // null, 'success', 'error'
+  
+  const { theme, toggleTheme } = useTheme();
+  const { t, language, changeLanguage } = useI18n();
+
+  const handleScan = async (data) => {
+    setScanning(true);
+    try {
+      // Fetch product from backend API
+      const response = await fetch(`http://localhost:5000/api/products/${data}`);
+      if (!response.ok) {
+        throw new Error('Product not found');
+      }
+      const product = await response.json();
+      setScannedProduct(product);
+      // Reset contact form when scanning a new product
+      setContactForm({ name: '', email: '', message: '' });
+      setContactFormVisible(false);
+      setContactStatus(null);
+    } catch (err) {
+      console.error(err);
+      setScannedProduct({ error: t('errorTitle') + '\n' + t('errorDescription') });
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const handleContactChange = (e) => {
+    const { name, value } = e.target;
+    setContactForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setContactStatus(null);
+  };
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    if (!scannedProduct) return;
+    
+    setContactStatus('sending');
+    try {
+      // Simulate sending message to farmer (in real app, this would go to backend)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // In a real app, you would send this to your backend
+      // For now, we'll just simulate success
+      setContactStatus('success');
+      setTimeout(() => {
+        setContactStatus(null);
+        setContactFormVisible(false);
+        setContactForm({ name: '', email: '', message: '' });
+      }, 3000);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      setContactStatus('error');
+    }
+  };
+
+  return (
+    <div className={`App ${theme}`}>
+      <header className="App-header">
+        <div className="header-content">
+          <div>
+            <h1>{t('appTitle')}</h1>
+            <p>{t('appDescription')}</p>
+          </div>
+          <div className="header-controls">
+            <button 
+              onClick={toggleTheme}
+              className="theme-toggle"
+              aria-label={theme === 'light' ? t('darkMode') : t('lightMode')}
+            >
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+            <select 
+              value={language}
+              onChange={(e) => changeLanguage(e.target.value)}
+              className="language-select"
+              aria-label={t('language')}
+            >
+              <option value="en">{t('english')}</option>
+              <option value="es">{t('spanish')}</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <div className="scanner-section">
+          <h2>{t('scanToTrace')}</h2>
+          <QRScanner onScan={handleScan} isScanning={scanning} />
+        </div>
+
+        {scannedProduct && (
+          <div className="results-section">
+            {!scannedProduct.error ? (
+              <>
+                <ProductDisplay product={scannedProduct} t={t} />
+                <ImpactStats product={scannedProduct} t={t} />
+                
+                {/* Contact Farmer Section */}
+                <div className="contact-section">
+                  <h3>{t('contactFarmer')}</h3>
+                  <button 
+                    onClick={() => setContactFormVisible(!contactFormVisible)}
+                    className="contact-toggle-btn"
+                  >
+                    {contactFormVisible ? 'Close Form' : `${t('contactFarmer')}`}
+                  </button>
+                  
+                  {contactFormVisible && (
+                    <form onSubmit={handleContactSubmit} className="contact-form">
+                      <div className="form-group">
+                        <label>{t('yourName')}</label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={contactForm.name}
+                          onChange={handleContactChange}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label>{t('yourEmail')}</label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={contactForm.email}
+                          onChange={handleContactChange}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label>{t('message')}</label>
+                        <textarea
+                          name="message"
+                          value={contactForm.message}
+                          onChange={handleContactChange}
+                          rows={4}
+                          required
+                        />
+                      </div>
+                      
+                      <button 
+                        type="submit" 
+                        className="submit-btn"
+                        disabled={contactStatus === 'sending'}
+                      >
+                        {contactStatus === 'sending' ? t('sending') : t('sendMessage')}
+                      </button>
+                      
+                      {contactStatus === 'success' && (
+                        <div className="status-success">{t('sent')}</div>
+                      )}
+                      
+                      {contactStatus === 'error' && (
+                        <div className="status-error">{t('failed')}</div>
+                      )}
+                    </form>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="error-message">
+                <h3>{scannedProduct.error}</h3>
+                <p>{t('errorDescription')}</p>
+                <ul>
+                  <li>FTF-001-APPLE-20260919 ({t('english')})</li>
+                  <li>FTF-002-EGGS-20260919 ({t('english')})</li>
+                  <li>FTF-003-TOMATO-20260919 ({t('english')})</li>
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {!scannedProduct && (
+          <div className="info-section">
+            <h2>{t('howItWorks')}</h2>
+            <div className="info-grid">
+              <div className="info-card">
+                <h3>{t('step1Scan')}</h3>
+                <p>{t('step1Description')}</p>
+              </div>
+              <div className="info-card">
+                <h3>{t(

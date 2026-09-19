@@ -1,0 +1,108 @@
+import React, { useState } from 'react';
+import './App.css';
+import QRScanner from './components/QRScanner';
+import ProductDisplay from './components/ProductDisplay';
+import ImpactStats from './components/ImpactStats';
+
+function App() {
+  const [scannedProduct, setScannedProduct] = useState(null);
+  const [scanning, setScanning] = useState(false);
+
+  const handleScan = (data) => {
+    setScanning(true);
+    // Simulate API call - in real app, this would fetch from backend
+    setTimeout(() => {
+      // Find product by scanning data (assuming it's a QR code)
+      // For demo, we'll simulate finding one of our sample products
+      const sampleProducts = [
+        { qrCode: 'FTF-001-APPLE-20260919', name: 'Organic Fuji Apple' },
+        { qrCode: 'FTF-002-EGGS-20260919', name: 'Free-Range Chicken Eggs' },
+        { qrCode: 'FTF-003-TOMATO-20260919', name: 'Heirloom Tomato Mix' }
+      ];
+      
+      const product = sampleProducts.find(p => p.qrCode === data);
+      if (product) {
+        // Get full product data (in real app from backend)
+        setScannedProduct({
+          ...product,
+          farm: product.name.includes('Apple') ? 'Green Valley Farm' : 
+                product.name.includes('Eggs') ? 'Sunny Meadow Poultry' : 'Heritage Gardens',
+          location: product.name.includes('Apple') ? 'Sonoma County, CA' : 
+                   product.name.includes('Eggs') ? 'Lancaster County, PA' : 'Willamette Valley, OR',
+          harvestDate: product.name.includes('Apple') ? '2026-09-15' : 
+                      product.name.includes('Eggs') ? '2026-09-18' : '2026-09-17',
+          farmerPrice: product.name.includes('Apple') ? 1.20 : 
+                      product.name.includes('Eggs') ? 3.50 : 2.80,
+          retailPrice: product.name.includes('Apple') ? 6.00 : 
+                      product.name.includes('Eggs') ? 7.99 : 5.50
+        });
+      } else {
+        setScannedProduct({ error: 'Product not found in our demo database' });
+      }
+      setScanning(false);
+    }, 1500); // Simulate network delay
+  };
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>🌱 FarmToFork Ledger</h1>
+        <p>Supply Chain Transparency for Local Produce</p>
+      </header>
+      
+      <main>
+        <div className="scanner-section">
+          <h2>Scan to Trace Your Food</h2>
+          <QRScanner onScan={handleScan} isScanning={scanning} />
+        </div>
+        
+        {scannedProduct && (
+          <div className="results-section">
+            {!scannedProduct.error ? (
+              <>
+                <ProductDisplay product={scannedProduct} />
+                <ImpactStats product={scannedProduct} />
+              </>
+            ) : (
+              <div className="error-message">
+                <h3>❌ {scannedProduct.error}</h3>
+                <p>Try scanning one of our demo QR codes:</p>
+                <ul>
+                  <li>FTF-001-APPLE-20260919 (Organic Fuji Apple)</li>
+                  <li>FTF-002-EGGS-20260919 (Free-Range Chicken Eggs)</li>
+                  <li>FTF-003-TOMATO-20260919 (Heirloom Tomato Mix)</li>
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {!scannedProduct && (
+          <div className="info-section">
+            <h2>How It Works</h2>
+            <div className="info-grid">
+              <div className="info-card">
+                <h3>1. Scan QR Code</h3>
+                <p>Use your phone camera to scan the QR code on any product</p>
+              </div>
+              <div className="info-card">
+                <h3>2. See Journey</h3>
+                <p>View the complete journey from farm to your table</p>
+              </div>
+              <div className="info-card">
+                <h3>3. Know Impact</h3>
+                <p>See exactly how much the farmer earned and their practices</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+      
+      <footer className="App-footer">
+        <p>FarmToFork Ledger • Built for Hackathon • Transparency from Seed to Shelf</p>
+      </footer>
+    </div>
+  );
+}
+
+export default App;

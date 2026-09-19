@@ -1,0 +1,25 @@
+{
+  "name": "farmtoforkledger",
+  "version": "1.0.0",
+  "description": "Supply Chain Transparency for Local Produce - QR-based blockchain solution",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\" ",
+    "server": "npm start --prefix server",
+    "client": "npm start --prefix client",
+    "install-all": "npm install && cd client && npm install && cd .."
+  },
+  "keywords": [
+    "blockchain",
+    "supply-chain",
+    "qr-code",
+    "food-safety",
+    "hackathon"
+  ],
+  "author": "FarmToFork Ledger Team",
+  "license": "MIT",
+  "dependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
